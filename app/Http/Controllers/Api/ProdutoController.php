@@ -18,9 +18,10 @@ class ProdutoController extends Controller
      */
     public function index()
     {
-        //dd('ok');
-        $data = Produto::with('saidas')->get();
-        return response()->json($data);
+
+            $data = Produto::with('saidas')->get();
+            return response()->json($data);
+
     }
 
     /**
@@ -72,8 +73,7 @@ class ProdutoController extends Controller
             'dataSaida' => 'nullable|date',
             'tipo' => 'nullable|string'
         ]);
-
-           $produto->update($validated);
+        $produto->update($validated);
 
         if($request->exists('dataSaida')){
             $produto->saidas()->create($validated);
