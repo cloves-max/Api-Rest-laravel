@@ -16,11 +16,18 @@ class ProdutoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-
-            $data = Produto::with('saidas')->get();
+        // dd($request->all());
+        if(!$request->has('nome')){
+            $data = Produto::with('saidas')->paginate(2);
             return response()->json($data);
+
+            //buscando pelo nome
+        }else{
+            $produto = Produto::whereNome($request->nome)->with('saidas')->paginate(2);
+            return response()->json($produto);
+        }
 
     }
 
@@ -50,10 +57,12 @@ class ProdutoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $produto = Produto::whereId($id)->first();
-        return response()->json($produto);
+
+            $produto = Produto::whereId($id)->first();
+            return response()->json($produto);
+
     }
 
     /**
@@ -65,7 +74,7 @@ class ProdutoController extends Controller
      */
     public function update(Request $request, Produto $produto)
     {
-        // dd($produto);
+        // dd($request->all());
         $validated = $request->validate([
             'nome' => 'nullable|string',
             'descricao' => 'nullable|string',
