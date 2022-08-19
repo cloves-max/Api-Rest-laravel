@@ -95,9 +95,10 @@ class ProdutoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Produto $produto)
     {
-        Produto::destroy($id);
+        $produto->saidas()->delete();
+        $produto->delete();
         return response()->noContent();
     }
 }

@@ -22,7 +22,7 @@ class CreateSaidasTable extends Migration
 
 
             $table->foreign('produto_id')->references('id')->on('produtos');
-
+            // $table->foreign('produto_id')->references('id')->on('produtos')->onDelete('cascade');
         });
     }
 
