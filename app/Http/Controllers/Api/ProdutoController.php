@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Produto;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Saida;
 use Illuminate\Support\Facades\DB;
 
 class ProdutoController extends Controller
@@ -34,7 +35,7 @@ class ProdutoController extends Controller
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
+
         $validated = $request->validate([
            'nome' => 'required',
            'descricao' => 'nullable|string',
@@ -42,16 +43,12 @@ class ProdutoController extends Controller
            'dataSaida' => 'nullable|date',
            'tipo' => 'nullable|string'
        ]);
-       try
-       {
-           $produto = Produto::create($validated);
-           DB::commit();
-            return response()->json($produto, 201);
-       }
-       catch (\Throwable $th)
+
+        $produto = DB::transaction(function () use ($validated)
         {
-        DB::rollBack();
-        }
+            return Produto::create($validated);
+        });
+            return response()->json($produto, 201);
 
     }
 
@@ -78,7 +75,7 @@ class ProdutoController extends Controller
      */
     public function update(Request $request, Produto $produto)
     {
-        DB::beginTransaction();
+
         $validated = $request->validate([
             'nome' => 'nullable|string',
             'descricao' => 'nullable|string',
@@ -86,16 +83,17 @@ class ProdutoController extends Controller
             'dataSaida' => 'nullable|date',
             'tipo' => 'nullable|string'
         ]);
-        try {
+
+        $produto = DB::transaction(function () use ($validated,$request,$produto){
+
             $produto->update($validated);
 
-            if($request->exists('dataSaida')){
-                $produto->saidas()->create($validated,201);
-            }
-            DB::commit();
-        } catch (\Throwable $th) {
-            DB::rollBack();
-        }
+                     if($request->exists('dataSaida')){
+                        $produto->saidas()->create($validated,201);
+                    }
+        });
+
+
     }
 
     /**
@@ -109,5 +107,10 @@ class ProdutoController extends Controller
         $produto->saidas()->delete();
         $produto->delete();
         return response()->noContent();
+    }
+    public function limparBanco(){
+        Saida::truncate();
+        Produto::truncate();
+        return response()->json('todos dados do bancoforam limpos',201);
     }
 }
