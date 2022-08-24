@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Produto;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Entrada;
-use App\Models\Saida;
-use GuzzleHttp\Handler\Proxy;
+use Illuminate\Support\Facades\DB;
 
 class ProdutoController extends Controller
 {
@@ -36,15 +34,21 @@ class ProdutoController extends Controller
      */
     public function store(Request $request)
     {
-         $validated = $request->validate([
-            'nome' => 'required',
-            'descricao' => 'nullable|string',
-            'dataEntrada' => 'nullable|date',
-            'dataSaida' => 'nullable|date',
-            'tipo' => 'nullable|string'
-        ]);
-        $produto = Produto::create($validated);
-        return response()->json($produto, 201);
+        $validated = $request->validate([
+           'nome' => 'required',
+           'descricao' => 'nullable|string',
+           'dataEntrada' => 'nullable|date',
+           'dataSaida' => 'nullable|date',
+           'tipo' => 'nullable|string'
+       ]);
+       DB::beginTransaction();
+        try {
+            $produto = Produto::create($validated);
+            return response()->json($produto, 201);
+           DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+        }
     }
 
     /**
@@ -77,10 +81,15 @@ class ProdutoController extends Controller
             'dataSaida' => 'nullable|date',
             'tipo' => 'nullable|string'
         ]);
-        $produto->update($validated);
+        try {
+            $produto->update($validated);
 
-        if($request->exists('dataSaida')){
-            $produto->saidas()->create($validated);
+            if($request->exists('dataSaida')){
+                $produto->saidas()->create($validated);
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
         }
     }
 
