@@ -22,7 +22,7 @@ class ProdutoController extends Controller
                 $data->where('nome', 'LIKE',"%{$request->nome}%");
                 //buscando pelo nome
             }
-                // dd($data->toSql());
+                 //dd($data->toSql());
                 return response()->json($data->paginate($page));
     }
 
@@ -41,14 +41,8 @@ class ProdutoController extends Controller
            'dataSaida' => 'nullable|date',
            'tipo' => 'nullable|string'
        ]);
-       DB::beginTransaction();
-        try {
             $produto = Produto::create($validated);
             return response()->json($produto, 201);
-           DB::commit();
-        } catch (\Throwable $th) {
-            DB::rollBack();
-        }
     }
 
     /**
