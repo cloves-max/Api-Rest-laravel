@@ -18,16 +18,14 @@ class ProdutoController extends Controller
      */
     public function index(Request $request)
     {
-        // dd($request->all());
-        if(!$request->has('nome')){
-            $data = Produto::with('saidas')->paginate(15);
-            return response()->json($data);
-
-            //buscando pelo nome
-        }
-            $produto = Produto::where('nome', 'LIKE',"%{$request->nome}%")->with('saidas')->paginate(2);
-            return response()->json($produto);
-
+        $page = empty($request->page)? 15:$request->page;
+        $data = Produto::with('saidas');
+            if($request->has('nome')){
+                $data->where('nome', 'LIKE',"%{$request->nome}%");
+                //buscando pelo nome
+            }
+                dd($data->toSql());
+                return response()->json($data->paginate($page));
     }
 
     /**
@@ -38,8 +36,6 @@ class ProdutoController extends Controller
      */
     public function store(Request $request)
     {
-
-       //dd($request->all());
          $validated = $request->validate([
             'nome' => 'required',
             'descricao' => 'nullable|string',
@@ -74,7 +70,6 @@ class ProdutoController extends Controller
      */
     public function update(Request $request, Produto $produto)
     {
-        // dd($request->all());
         $validated = $request->validate([
             'nome' => 'nullable|string',
             'descricao' => 'nullable|string',
