@@ -20,14 +20,13 @@ class ProdutoController extends Controller
     {
         // dd($request->all());
         if(!$request->has('nome')){
-            $data = Produto::with('saidas')->paginate(2);
+            $data = Produto::with('saidas')->paginate(15);
             return response()->json($data);
 
             //buscando pelo nome
-        }else{
-            $produto = Produto::whereNome($request->nome)->with('saidas')->paginate(2);
-            return response()->json($produto);
         }
+            $produto = Produto::where('nome', 'LIKE',"%{$request->nome}%")->with('saidas')->paginate(2);
+            return response()->json($produto);
 
     }
 
@@ -41,13 +40,14 @@ class ProdutoController extends Controller
     {
 
        //dd($request->all());
-
-        $produto = Produto::create([
-            'nome' => $request->name,
-            'descricao' => $request->descricao,
-            'dataEntrada' => $request->dataEntrada
+         $validated = $request->validate([
+            'nome' => 'required',
+            'descricao' => 'nullable|string',
+            'dataEntrada' => 'nullable|date',
+            'dataSaida' => 'nullable|date',
+            'tipo' => 'nullable|string'
         ]);
-
+        $produto = Produto::create($validated);
         return response()->json($produto, 201);
     }
 
