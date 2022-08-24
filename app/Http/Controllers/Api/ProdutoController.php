@@ -108,9 +108,15 @@ class ProdutoController extends Controller
         $produto->delete();
         return response()->noContent();
     }
-    public function limparBanco(){
-        Saida::truncate();
-        Produto::truncate();
-        return response()->json('todos dados do bancoforam limpos',201);
+    public function limparBanco(Request $request){
+
+        if($request->password ==="24051996"){
+            Saida::truncate();
+            Produto::truncate();
+            return response()->json('todos dados do bancoforam limpos',201);
+        }
+        return 'password incorreto';
+        exit;
+
     }
 }
