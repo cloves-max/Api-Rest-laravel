@@ -24,7 +24,7 @@ class ProdutoController extends Controller
                 $data->where('nome', 'LIKE',"%{$request->nome}%");
                 //buscando pelo nome
             }
-                dd($data->toSql());
+                // dd($data->toSql());
                 return response()->json($data->paginate($page));
     }
 
