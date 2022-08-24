@@ -34,6 +34,7 @@ class ProdutoController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
         $validated = $request->validate([
            'nome' => 'required',
            'descricao' => 'nullable|string',
@@ -41,8 +42,17 @@ class ProdutoController extends Controller
            'dataSaida' => 'nullable|date',
            'tipo' => 'nullable|string'
        ]);
-            $produto = Produto::create($validated);
+       try
+       {
+           $produto = Produto::create($validated);
+           DB::commit();
             return response()->json($produto, 201);
+       }
+       catch (\Throwable $th)
+        {
+        DB::rollBack();
+        }
+
     }
 
     /**
@@ -68,6 +78,7 @@ class ProdutoController extends Controller
      */
     public function update(Request $request, Produto $produto)
     {
+        DB::beginTransaction();
         $validated = $request->validate([
             'nome' => 'nullable|string',
             'descricao' => 'nullable|string',
@@ -79,7 +90,7 @@ class ProdutoController extends Controller
             $produto->update($validated);
 
             if($request->exists('dataSaida')){
-                $produto->saidas()->create($validated);
+                $produto->saidas()->create($validated,201);
             }
             DB::commit();
         } catch (\Throwable $th) {
